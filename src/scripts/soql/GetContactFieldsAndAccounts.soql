@@ -1,0 +1,4 @@
+SELECT FIELDS(ALL)
+FROM Contact
+WHERE AccountId != NULL
+LIMIT 200

@@ -1,0 +1,38 @@
+<apex:page lightningStylesheets="true" id="OrganizationInfo" controller="OrganizationInfoController">
+    <apex:pageBlock title="Organization Info">
+
+        <apex:pageMessages />
+
+        <apex:pageBlockTable value="{!licenseInfoList}" var="license">
+            <apex:column value="{!license.name}"/>
+            <apex:column value="{!license.availableLicenses}"/>
+        </apex:pageBlockTable>
+
+        <apex:pageBlock>
+            Number of Apex Classes: {!numberOfApexClasses}
+        </apex:pageBlock>
+
+        <apex:pageBlock>
+            Number of Visualforce Pages: {!numberOfVisualforcePages}
+        </apex:pageBlock>
+
+        <apex:form>
+            <apex:pageBlockTable value="{!usersTable}" var="user">
+                <apex:column value="{!user.Username}"/>
+                <apex:column value="{!user.Email}"/>
+                <apex:column value="{!user.IsActive}"/>
+                <apex:column>
+                    <apex:commandLink value="View" action="{!viewUser}">
+                        <apex:param name="id" value="{!user.Id}" assignTo="{!userId}" />
+                    </apex:commandLink>
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:form>
+
+    </apex:pageBlock>
+
+    <apex:pageBlock>
+        Session id: {!sessionId}
+    </apex:pageBlock>
+
+</apex:page>

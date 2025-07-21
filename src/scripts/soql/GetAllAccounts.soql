@@ -1,0 +1,2 @@
+SELECT Id
+FROM Account

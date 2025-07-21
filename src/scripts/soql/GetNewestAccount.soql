@@ -1,0 +1,4 @@
+SELECT Id
+FROM Account
+ORDER BY CreatedDate DESC
+LIMIT 1

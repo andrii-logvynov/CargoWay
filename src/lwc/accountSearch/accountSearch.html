@@ -1,0 +1,42 @@
+<template>
+  <lightning-card title="Account Search">
+    <div class="slds-p-around_medium">
+      <lightning-input label="Search by Name" value={searchField1} onchange={handleSearch1}></lightning-input>
+      <lightning-input label="Search by Industry" value={searchField2} onchange={handleSearch2}></lightning-input>
+
+      <lightning-button label="Clear All" onclick={clearAll} class="slds-m-top_small"></lightning-button>
+
+      <template if:true={accounts.length}>
+        <lightning-combobox
+            label="Rows per page"
+            value={pageSize}
+            options={pageSizeOptions}
+            onchange={handlePageSizeChange}
+            class="slds-m-top_small">
+        </lightning-combobox>
+
+        <lightning-datatable
+            key-field="Id"
+            data={accounts}
+            columns={columns}
+            hide-checkbox-column
+            class="slds-m-top_medium">
+        </lightning-datatable>
+
+        <div class="slds-m-top_medium">
+          <lightning-button-group>
+            <lightning-button label="First" onclick={goToFirstPage}></lightning-button>
+            <lightning-button label="Previous" onclick={goToPreviousPage}></lightning-button>
+            <p class="slds-m-horizontal_small slds-m-vertical_xx-small">Page {pageNumber} of {totalPages}</p>
+            <lightning-button label="Next" onclick={goToNextPage}></lightning-button>
+            <lightning-button label="Last" onclick={goToLastPage}></lightning-button>
+          </lightning-button-group>
+        </div>
+      </template>
+
+      <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+      </template>
+    </div>
+  </lightning-card>
+</template>

@@ -1,0 +1,5 @@
+SELECT AccountId, COUNT(Id)
+FROM Contact
+WHERE AccountId != NULL
+GROUP BY AccountId
+HAVING COUNT(Id) > 1
