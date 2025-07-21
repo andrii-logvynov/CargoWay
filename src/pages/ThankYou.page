@@ -79,7 +79,7 @@
                 <p>Your information is registered. We will contact you soon!</p>
             </div>
         </main>
-        <c:Footer />
+        <c:Footer_c />
     </body>
 
 
