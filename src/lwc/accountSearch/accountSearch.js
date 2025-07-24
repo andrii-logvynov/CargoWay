@@ -83,23 +83,27 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
             industry: this.industryField,
             pageSize: this.pageSize,
             pageNumber: this.pageNumber
-        }).then(accounts => {
+        }).then(response => {
+            console.log(response);
+            const accounts = response.accounts;
             this.accounts = accounts.map(account => ({ ...account, Location: 'Internal' }));
+            this.totalRecords = response.totalSize;
         }).then(() => {
             searchAccountsFromDev({
                 name: this.nameField,
                 industry: this.industryField,
                 pageSize: this.pageSize,
                 pageNumber: this.pageNumber
-            })
-                .then(accounts => {
-                    this.totalRecords = this.accounts.length + accounts.length;
-                    if (this.accounts.length < this.pageSize) {
-                        accounts = accounts.map(account => ({ ...account, Location: 'External' }));
-                        this.accounts = this.accounts.concat(accounts);
-                    }
-                    this.isLoading = false;
-                })
+            }).then(response => {
+                console.log(response)
+                this.totalRecords += response.totalSize;
+                if (this.accounts.length < this.pageSize) {
+                    let accounts = response.records;
+                    accounts = accounts.map(account => ({ ...account, Location: 'External' }));
+                    this.accounts = this.accounts.concat(accounts);
+                }
+                this.isLoading = false;
+            });
         });
     }
 
