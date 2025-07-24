@@ -1,25 +1,35 @@
 <template>
   <lightning-card title="Account Search">
     <div class="slds-p-around_medium">
-      <lightning-input label="Search by Name" value={searchField1} onchange={handleSearch1}></lightning-input>
-      <lightning-input label="Search by Industry" value={searchField2} onchange={handleSearch2}></lightning-input>
+      <div class="slds-grid slds-grid_align-spread">
+        <div class="slds-grid slds-p-around_xx-small inputs">
+          <lightning-input class="compact-input no-border slds-size_1-of-4" label="Search by Name" value={nameField} onchange={handleNameFieldChange}></lightning-input>
+          <lightning-input class="compact-input no-border slds-size_1-of-4" label="Search by Industry" value={industryField} onchange={handleIndustryFieldChange}></lightning-input>
 
-      <lightning-button label="Clear All" onclick={clearAll} class="slds-m-top_small"></lightning-button>
+          <lightning-button label="Search" onclick={search}></lightning-button>
+          <lightning-button label="Clear All" onclick={clearAll}></lightning-button>
+        </div>
+        <div class="slds-col slds-size_1-of-8">
+          <lightning-combobox
+              label="Rows per page"
+              value={pageSize}
+              options={pageSizeOptions}
+              onchange={handlePageSizeChange}>
+          </lightning-combobox>
+        </div>
+      </div>
 
-      <template if:true={accounts.length}>
-        <lightning-combobox
-            label="Rows per page"
-            value={pageSize}
-            options={pageSizeOptions}
-            onchange={handlePageSizeChange}
-            class="slds-m-top_small">
-        </lightning-combobox>
+      <template lwc:if={isLoading}>
+        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+      </template>
 
+      <template lwc:elseif={doAccountsExist}>
         <lightning-datatable
             key-field="Id"
             data={accounts}
             columns={columns}
             hide-checkbox-column
+            onrowaction={handleRowAction}
             class="slds-m-top_medium">
         </lightning-datatable>
 
@@ -34,9 +44,10 @@
         </div>
       </template>
 
-      <template if:true={isLoading}>
-        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+      <template lwc:else>
+        <p>No Accounts found</p>
       </template>
+
     </div>
   </lightning-card>
 </template>

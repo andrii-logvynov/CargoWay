@@ -1,0 +1,18 @@
+.compact-input {
+    max-width: 250px;
+}
+
+.no-border {
+    border: none;
+}
+
+.correct-input {
+    margin-bottom: 2px;
+}
+
+.inputs {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}

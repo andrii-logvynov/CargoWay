@@ -1,22 +1,30 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement } from 'lwc';
 import searchAccounts from '@salesforce/apex/AccountSearchController.searchAccounts';
-import countAccounts from '@salesforce/apex/AccountSearchController.countAccounts';
+import searchAccountsFromDev from '@salesforce/apex/AccountSearchController.searchAccountsFromDev';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class AccountSearch extends LightningElement {
-    @track nameField = '';
-    @track industryField = '';
-    @track accounts = [];
-    @track pageNumber = 1;
-    @track totalRecords = 0;
-    @track pageSize = 10;
+export default class AccountSearch extends NavigationMixin(LightningElement) {
+    nameField = '';
+    industryField = '';
+    accounts = [];
+    pageNumber = 1;
+    totalRecords = 0;
+    pageSize = 10;
     isLoading = false;
 
     columns = [
-        { label: 'Name', fieldName: 'Name' },
+        {
+            label: 'Name', fieldName: 'Name', type: 'url',
+            typeAttributes: {
+                label: { fieldName: 'Name' },
+                name: 'view_record'
+            }
+        },
         { label: 'Industry', fieldName: 'Industry' },
         { label: 'Phone', fieldName: 'Phone' },
         { label: 'Type', fieldName: 'Type' },
-        { label: 'Website', fieldName: 'Website' }
+        { label: 'Website', fieldName: 'Website' },
+        { label: 'Location', fieldName: 'Location' }
     ];
 
     pageSizeOptions = [
@@ -30,18 +38,23 @@ export default class AccountSearch extends LightningElement {
         return Math.ceil(this.totalRecords / this.pageSize);
     }
 
+    get doAccountsExist() {
+        return !!this.accounts.length;
+    };
+
     connectedCallback() {
         this.fetchAccounts();
     }
 
-    handleSearch1(event) {
+    handleNameFieldChange(event) {
         this.nameField = event.target.value;
-        this.pageNumber = 1;
-        this.fetchAccounts();
     }
 
-    handleSearch2(event) {
+    handleIndustryFieldChange(event) {
         this.industryField = event.target.value;
+    }
+
+    search() {
         this.pageNumber = 1;
         this.fetchAccounts();
     }
@@ -49,6 +62,7 @@ export default class AccountSearch extends LightningElement {
     handlePageSizeChange(event) {
         this.pageSize = parseInt(event.detail.value, 10);
         this.pageNumber = 1;
+        this.isLoading = true;
         this.fetchAccounts();
     }
 
@@ -60,22 +74,32 @@ export default class AccountSearch extends LightningElement {
     }
 
     fetchAccounts() {
+        this.accounts = [];
+        this.totalRecords = 0;
         this.isLoading = true;
-
-        countAccounts({ name: this.nameField, industry: this.industryField })
-            .then(result => {
-                this.totalRecords = result;
-                this.isLoading = false;
-            });
 
         searchAccounts({
             name: this.nameField,
             industry: this.industryField,
             pageSize: this.pageSize,
             pageNumber: this.pageNumber
-        }).then(result => {
-            this.accounts = result;
-            this.isLoading = false;
+        }).then(accounts => {
+            this.accounts = accounts.map(account => ({ ...account, Location: 'Internal' }));
+        }).then(() => {
+            searchAccountsFromDev({
+                name: this.nameField,
+                industry: this.industryField,
+                pageSize: this.pageSize,
+                pageNumber: this.pageNumber
+            })
+                .then(accounts => {
+                    this.totalRecords = this.accounts.length + accounts.length;
+                    if (this.accounts.length < this.pageSize) {
+                        accounts = accounts.map(account => ({ ...account, Location: 'External' }));
+                        this.accounts = this.accounts.concat(accounts);
+                    }
+                    this.isLoading = false;
+                })
         });
     }
 
@@ -105,5 +129,25 @@ export default class AccountSearch extends LightningElement {
             this.pageNumber = this.totalPages;
             this.fetchAccounts();
         }
+    }
+
+    handleRowAction(event) {
+        const actionName = event.detail.action.name;
+        const row = event.detail.row;
+
+        if (actionName === 'view_record' && row.OrgType === 'Local') {
+            this.navigateToRecord(row.Id);
+        }
+    }
+
+    navigateToRecord(recordId) {
+        this[NavigationMixin.Navigate]({
+            type: 'standard__recordPage',
+            attributes: {
+                recordId: recordId,
+                objectApiName: 'Account',
+                actionName: 'view'
+            }
+        });
     }
 }
