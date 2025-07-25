@@ -11,10 +11,16 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
     totalRecords = 0;
     pageSize = 10;
     isLoading = false;
+    showAccountCreation = false;
+    accountCreationMode = 'create';
+    recordId = '';
+    record = null;
 
     columns = [
         {
-            label: 'Name', fieldName: 'Name', type: 'url',
+            label: 'Name',
+            fieldName: 'Name',
+            type: 'url',
             typeAttributes: {
                 label: { fieldName: 'Name' },
                 name: 'view_record'
@@ -24,7 +30,15 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
         { label: 'Phone', fieldName: 'Phone' },
         { label: 'Type', fieldName: 'Type' },
         { label: 'Website', fieldName: 'Website' },
-        { label: 'Location', fieldName: 'Location' }
+        { label: 'Location', fieldName: 'Location' },
+        {
+            label: 'Action',
+            type: 'button',
+            typeAttributes: {
+                label: 'Edit',
+                name: 'edit'
+            }
+        }
     ];
 
     pageSizeOptions = [
@@ -42,8 +56,31 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
         return !!this.accounts.length;
     };
 
+    get isFirstPage() {
+        return this.pageNumber === 1;
+    }
+    get isLastPage() {
+        return this.pageNumber === this.totalPages;
+    }
+
+    onCloseAccountModal() {
+        this.showAccountCreation = false;
+    }
+
     connectedCallback() {
         this.fetchAccounts();
+    }
+
+    onCreateAccount() {
+        this.accountCreationMode = 'create';
+        this.showAccountCreation = true;
+    }
+
+    modifyAccount(recordId) {
+        this.accountCreationMode = 'edit';
+        this.recordId = recordId;
+        this.showAccountCreation = true;
+
     }
 
     handleNameFieldChange(event) {
@@ -84,24 +121,26 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
             pageSize: this.pageSize,
             pageNumber: this.pageNumber
         }).then(response => {
-            console.log(response);
-            const accounts = response.accounts;
+            console.log('lres: ', response);
+            const accounts = response.records;
             this.accounts = accounts.map(account => ({ ...account, Location: 'Internal' }));
             this.totalRecords = response.totalSize;
         }).then(() => {
+            const accountsNumberToLoad = this.pageSize - this.accounts.length;
             searchAccountsFromDev({
                 name: this.nameField,
                 industry: this.industryField,
-                pageSize: this.pageSize,
+                pageSize: accountsNumberToLoad,
                 pageNumber: this.pageNumber
             }).then(response => {
-                console.log(response)
+                console.log('eres: ', response);
                 this.totalRecords += response.totalSize;
                 if (this.accounts.length < this.pageSize) {
                     let accounts = response.records;
                     accounts = accounts.map(account => ({ ...account, Location: 'External' }));
                     this.accounts = this.accounts.concat(accounts);
                 }
+            }).finally(() => {
                 this.isLoading = false;
             });
         });
@@ -135,20 +174,35 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
         }
     }
 
-    handleRowAction(event) {
+    onRowAction(event) {
+        console.log('rowaction event: ', event);
+        console.log('detail: ', event.detail);
+        console.log('detail.action: ', event.detail.action);
+        console.log('detail.row: ', event.detail.row);
+        console.log('detail.row.Id: ', event.detail.row.Id);
         const actionName = event.detail.action.name;
+        console.log('actionName: ', actionName);
         const row = event.detail.row;
+        this.recordId = row.Id;
+        this.record = row;
 
-        if (actionName === 'view_record' && row.OrgType === 'Local') {
-            this.navigateToRecord(row.Id);
+        if (actionName === 'view_record' && row.Location === 'Local') {
+            console.log('navigation...');
+            this.navigateToRecord(this.recordId);
+        }
+
+        if (actionName === 'edit') {
+            this.modifyAccount(this.recordId);
         }
     }
 
-    navigateToRecord(recordId) {
+    navigateToRecord(event) {
+        this.recordId = event.detail.row.Id;
+        console.log(this.recordId);
         this[NavigationMixin.Navigate]({
             type: 'standard__recordPage',
             attributes: {
-                recordId: recordId,
+                recordId: this.recordId,
                 objectApiName: 'Account',
                 actionName: 'view'
             }

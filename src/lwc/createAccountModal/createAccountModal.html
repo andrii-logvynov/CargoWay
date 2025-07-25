@@ -1,0 +1,126 @@
+<template>
+  <section class="slds-modal slds-fade-in-open" role="dialog">
+    <div class="slds-modal__container">
+
+      <header class="slds-modal__header">
+        <h2 class="slds-text-heading_medium">{modalCaption}</h2>
+        <button class="slds-button slds-button_icon slds-modal__close" onclick={onClose}>
+          <lightning-icon alternative-text="Close" icon-name="utility:close" size="small"></lightning-icon>
+        </button>
+      </header>
+
+      <div class="slds-modal__content slds-p-around_medium">
+
+        <template lwc:if={isEditMode}>
+          <lightning-record-edit-form
+              object-api-name="Account"
+              record-id={recordId}
+              onsuccess={handleSuccess}
+              onerror={handleError}
+          >
+            <lightning-messages></lightning-messages>
+            <div class="slds-grid slds-wrap">
+              <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
+                <lightning-input-field field-name="Name" required></lightning-input-field>
+                <lightning-input-field field-name="Industry"></lightning-input-field>
+              </div>
+              <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
+                <lightning-input-field field-name="Phone"></lightning-input-field>
+                <lightning-input-field field-name="Type"></lightning-input-field>
+              </div>
+            </div>
+
+            <div class="slds-m-top_medium slds-text-align_right">
+              <lightning-button
+                  label="Cancel"
+                  title="Cancel"
+                  onclick={handleCancel}
+                  class="slds-m-right_x-small">
+              </lightning-button>
+              <lightning-button
+                  variant="brand"
+                  type="submit"
+                  label="Save Account"
+                  title="Save Account">
+              </lightning-button>
+            </div>
+          </lightning-record-edit-form>
+
+        </template>
+
+        <template lwc:if={isCreationMode}>
+
+          <template lwc:if={accountCreated}>
+            <div class="slds-modal slds-fade-in-open">
+              <div class="slds-modal__container">
+                <div class="slds-modal__content slds-p-around_medium">
+                  <p>Account successfully created!</p>
+                  <lightning-button label="Ok" onclick={onClose}></lightning-button>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <lightning-select
+              class="slds-form-element slds-size_1-of-3"
+              label="Location"
+              onchange={onLocationChange}
+              options={locations}
+              value={location}>
+          </lightning-select>
+
+          <template lwc:if={isInternal}>
+            <lightning-record-form
+                layout-type="Full"
+                mode="edit"
+                object-api-name="Account"
+                onsuccess={createAccount}>
+            </lightning-record-form>
+          </template>
+
+          <template lwc:if={isExternal}>
+            <lightning-input
+                label="Account Name"
+                onchange={onNameChange}
+                required="true"
+                value={accountName}>
+            </lightning-input>
+            <lightning-select
+                label="Industry"
+                onchange={onIndustryChange}
+                options={industries}
+                required="true"
+                value={industry}>
+            </lightning-select>
+            <lightning-select
+                label="Type"
+                onchange={onTypeChange}
+                options={types}
+                required="true"
+                value={type}>
+            </lightning-select>
+          </template>
+        </template>
+      </div>
+
+      <template lwc:if={isExternal}>
+        <footer class="slds-modal__footer slds-button-group-row">
+          <lightning-button
+              class="slds-button-group-item"
+              label="Cancel"
+              onclick={onClose}
+              variant="neutral"
+          ></lightning-button>
+          <lightning-button
+              class="slds-button-group-item"
+              label="Save"
+              onclick={createAccount}
+              variant="brand"
+          ></lightning-button>
+        </footer>
+      </template>
+    </div>
+  </section>
+
+  <div class="slds-backdrop slds-backdrop_open"></div>
+</template>

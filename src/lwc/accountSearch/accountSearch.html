@@ -1,6 +1,13 @@
 <template>
   <lightning-card title="Account Search">
     <div class="slds-p-around_medium">
+      <div class="create-new">
+        <lightning-button label="Create" onclick={onCreateAccount}></lightning-button>
+
+        <template lwc:if={showAccountCreation}>
+          <c-create-account-modal mode={accountCreationMode} record={record} onclose={onCloseAccountModal}></c-create-account-modal>
+        </template>
+      </div>
       <div class="slds-grid slds-grid_align-spread">
         <div class="slds-grid slds-p-around_xx-small inputs">
           <lightning-input class="compact-input no-border slds-size_1-of-4" label="Search by Name" value={nameField} onchange={handleNameFieldChange}></lightning-input>
@@ -10,12 +17,12 @@
           <lightning-button label="Clear All" onclick={clearAll}></lightning-button>
         </div>
         <div class="slds-col slds-size_1-of-8">
-          <lightning-combobox
+          <lightning-select
               label="Rows per page"
               value={pageSize}
               options={pageSizeOptions}
               onchange={handlePageSizeChange}>
-          </lightning-combobox>
+          </lightning-select>
         </div>
       </div>
 
@@ -28,18 +35,19 @@
             key-field="Id"
             data={accounts}
             columns={columns}
-            hide-checkbox-column
-            onrowaction={handleRowAction}
-            class="slds-m-top_medium">
-        </lightning-datatable>
+            hide-checkbox-column="true"
+            show-row-number-column="true"
+            onrowaction={onRowAction}
+            class="slds-m-top_medium"
+        ></lightning-datatable>
 
-        <div class="slds-m-top_medium">
+        <div class="slds-m-top_medium pagination">
           <lightning-button-group>
-            <lightning-button label="First" onclick={goToFirstPage}></lightning-button>
-            <lightning-button label="Previous" onclick={goToPreviousPage}></lightning-button>
+            <lightning-button label="First" onclick={goToFirstPage} disabled={isFirstPage}></lightning-button>
+            <lightning-button label="Previous" onclick={goToPreviousPage} disabled={isFirstPage}></lightning-button>
             <p class="slds-m-horizontal_small slds-m-vertical_xx-small">Page {pageNumber} of {totalPages}</p>
-            <lightning-button label="Next" onclick={goToNextPage}></lightning-button>
-            <lightning-button label="Last" onclick={goToLastPage}></lightning-button>
+            <lightning-button label="Next" onclick={goToNextPage} disabled={isLastPage}></lightning-button>
+            <lightning-button label="Last" onclick={goToLastPage} disabled={isLastPage}></lightning-button>
           </lightning-button-group>
         </div>
       </template>

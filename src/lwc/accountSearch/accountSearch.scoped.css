@@ -16,3 +16,12 @@
     gap: 1rem;
     margin-bottom: 0.5rem;
 }
+
+.pagination {
+    display: flex;
+    justify-content: center;
+}
+
+.test {
+    background: red !important;
+}
