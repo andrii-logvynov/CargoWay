@@ -28,5 +28,9 @@
         <members>*</members>
         <name>StaticResource</name>
     </types>
+    <types>
+        <members>signature_pad</members>
+        <name>StaticResource</name>
+    </types>
     <version>64.0</version>
 </Package>

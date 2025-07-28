@@ -1,3 +1,12 @@
+.name-cell {
+        --sds-c-button-transform-active: none;
+        --slds-c-button-shadow-focus: none;
+        --slds-c-button-color-background-active: transparent;
+        --sds-c-button-transform-active: none;
+        --slds-c-button-shadow-focus: none;
+        --slds-c-button-color-background-active: transparent;
+}
+
 .compact-input {
     max-width: 250px;
 }
@@ -20,8 +29,4 @@
 .pagination {
     display: flex;
     justify-content: center;
-}
-
-.test {
-    background: red !important;
 }

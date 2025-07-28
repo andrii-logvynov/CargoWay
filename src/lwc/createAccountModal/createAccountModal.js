@@ -1,13 +1,10 @@
 import { LightningElement, api } from 'lwc';
 import postAccount from '@salesforce/apex/AccountSearchController.postAccount';
-import NAME_FIELD from '@salesforce/schema/Account.Name';
-import INDUSTRY_FIELD from '@salesforce/schema/Account.Industry';
-import PHONE_FIELD from '@salesforce/schema/Account.Phone';
-import TYPE_FIELD from '@salesforce/schema/Account.Type';
+import patchAccountToDev from '@salesforce/apex/AccountSearchController.patchAccountToDev';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from "lightning/navigation";
 
 const LOCATIONS = [
-    { label: 'choose location...', value: '' },
     { label: 'Internal', value: 'Internal' },
     { label: 'External', value: 'External' },
 ]
@@ -53,40 +50,66 @@ const ACCOUNT_TYPES = [
     { label: 'Other', value: 'Other' }
 ];
 
-export default class CreateAccountModal extends LightningElement {
+const RATING_OPTIONS = [
+    { label: 'Hot', value: 'Hot' },
+    { label: 'Warm', value: 'Warm' },
+    { label: 'Cold', value: 'Cold' },
+]
+
+const OWNERSHIP_OPTIONS = [
+    { label: 'Public', value: 'Public' },
+    { label: 'Private', value: 'Private' },
+    { label: 'Subsidiary', value: 'Subsidiary' },
+    { label: 'Other', value: 'Other' },
+];
+
+export default class CreateAccountModal extends NavigationMixin(LightningElement) {
     @api
     mode = 'create';
+
+    picklists = {
+        locations: LOCATIONS,
+        industries: INDUSTRIES,
+        types: ACCOUNT_TYPES,
+        ratingOptions: RATING_OPTIONS,
+        ownershipOptions: OWNERSHIP_OPTIONS
+    }
+
+    _accountData = {};
+
+    _isInternal = true;
+    isLoading = false;
+
+    get accountLocation() {
+        return this._isInternal ? 'Internal' : 'External';
+    }
+
     @api
-    record = null;
+    get account() {
+        return this._accountData;
+    }
 
-    location = '';
-    locations = LOCATIONS;
-
-    accountName = '';
-    industry = '';
-    industries = INDUSTRIES;
-
-    types = ACCOUNT_TYPES;
-    type = '';
-
-    accountCreated = false;
-    showAccountEditSuccess = false;
-
-    objectApiName = 'Account';
-    nameField = NAME_FIELD;
-    industryField = INDUSTRY_FIELD;
-    phoneField = PHONE_FIELD;
-    typeField = TYPE_FIELD;
+    set account(value) {
+        this._accountData = { ...value};
+    }
 
     get modalCaption() {
         return this.isCreationMode ? 'New Account' : 'Edit Account';
     }
 
     get isInternal() {
-        return this.location === 'Internal';
+        if (this.account.Id) {
+            return this.account.Location === 'Internal';
+        } else {
+            return this._isInternal;
+        }
     }
     get isExternal() {
-        return this.location === 'External';
+        if (this.account?.Id) {
+            return this.account.Location === 'External';
+        } else {
+            return !this._isInternal;
+        }
     }
 
     get isCreationMode() {
@@ -97,69 +120,43 @@ export default class CreateAccountModal extends LightningElement {
         return this.mode === 'edit';
     }
 
-    get recordId() {
-        return this.record.Id;
+    get accountIdOrNull() {
+        return this.account.Id || null;
     }
 
-    handleSuccess() {
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Success',
-                message: 'Account created successfully!',
-                variant: 'success',
-            }),
-        );
-        this.dispatchEvent(new CustomEvent('close'));
+    onSuccess() {
+        this.showToast('Success', `Account ${this.isCreationMode ? 'created' : 'updated'} successfully!`, 'success');
+        this.dispatchEvent(new CustomEvent('refresh', {bubbles: true}));
+        this.onClose();
     }
 
-    handleError(event) {
-        console.error('Error creating account');
-        this.dispatchEvent(
-            new ShowToastEvent({
-                title: 'Error creating record',
-                message: event.detail.message,
-                variant: 'error',
-            }),
-        );
+    onError() {
+        this.showToast('Error creating Account', 'Account creation failed', 'error');
     }
 
-    handleCancel() {
-        this.dispatchEvent(new CustomEvent('close'));
-    }
-
-    onTypeChange(event) {
-        this.type = event.detail.value;
-    }
-
-    accountEditSuccess() {
-        this.showAccountEditSuccess = true;
-    }
-
-    createAccount(event) {
-        console.log(event);
-
-        postAccount({
-            name: this.accountName,
-            industry: this.industry,
-            type: this.type
-        }).then(response => {
-            console.log('response: ', response);
-            this.accountCreated = true;
-        });
-    }
-
-    onNameChange(event) {
-        this.accountName = event.detail.value;
-    }
-
-    onIndustryChange(event) {
-        this.industry = event.detail.value;
+    onFieldChange(event) {
+        const field = event.target.dataset.field;
+        const value = event.detail.value;
+        this._accountData = {
+            ...this.account,
+            [field]: value
+        }
     }
 
     onLocationChange(event) {
-        this.location = event.detail.value;
-        console.log(this.location);
-
+        if (event.detail.value === 'Internal') {
+            const config = {
+                type: "standard__recordPage",
+                attributes: {
+                    recordId: this.account.Id,
+                    objectApiName: "Account",
+                    actionName: "edit"
+                }
+            };
+            this[NavigationMixin.Navigate](config);
+        } else {
+            this._isInternal = false;
+        }
     }
 
     onClose() {
@@ -167,6 +164,35 @@ export default class CreateAccountModal extends LightningElement {
     }
 
     onSave() {
-        this.accountCreated = true;
+        this.isLoading = true;
+        if (this.isCreationMode) {
+
+            console.log('account', JSON.stringify(this.account));
+            postAccount({ accountToCreate: this.account }).then(_response => {
+                this.onSuccess();
+                this.isLoading = false;
+            });
+        } else {
+            delete this.account.Location;
+            const attributes = this.account.attributes;
+            delete this.account.attributes;
+
+            this._accountData = { ...this.account, ...attributes };
+            console.log('account', JSON.stringify(this.account));
+
+            patchAccountToDev({ accountToUpdate: this.account }).then(_response => {
+                this.onSuccess();
+                this.isLoading = false;
+            });
+        }
+    }
+
+    showToast(title, message, variant) {
+        const event = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant,
+        });
+        this.dispatchEvent(event);
     }
 }

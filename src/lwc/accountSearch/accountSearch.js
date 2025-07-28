@@ -7,23 +7,29 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
     nameField = '';
     industryField = '';
     accounts = [];
+
     pageNumber = 1;
     totalRecords = 0;
     pageSize = 10;
+
     isLoading = false;
     showAccountCreation = false;
     accountCreationMode = 'create';
-    recordId = '';
     record = null;
 
     columns = [
         {
             label: 'Name',
             fieldName: 'Name',
-            type: 'url',
+            type: 'button',
+            initialWidth: 250,
             typeAttributes: {
                 label: { fieldName: 'Name' },
-                name: 'view_record'
+                name: 'view_record',
+                variant: 'base'
+            },
+            cellAttributes: {
+                class: 'slds-text-align_left name-cell'
             }
         },
         { label: 'Industry', fieldName: 'Industry' },
@@ -34,6 +40,7 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
         {
             label: 'Action',
             type: 'button',
+            initialWidth: 80,
             typeAttributes: {
                 label: 'Edit',
                 name: 'edit'
@@ -63,11 +70,18 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
         return this.pageNumber === this.totalPages;
     }
 
-    onCloseAccountModal() {
-        this.showAccountCreation = false;
+    connectedCallback() {
+        this.fetchAccounts();
+        console.log('accountSearch started');
     }
 
-    connectedCallback() {
+    onCloseAccountModal() {
+        this.showAccountCreation = false;
+        this.record = null;
+    }
+
+    onRefresh() {
+        console.log('refresh...');
         this.fetchAccounts();
     }
 
@@ -76,38 +90,65 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
         this.showAccountCreation = true;
     }
 
-    modifyAccount(recordId) {
+    modifyAccount(record) {
         this.accountCreationMode = 'edit';
-        this.recordId = recordId;
+        this.record = record;
         this.showAccountCreation = true;
-
     }
 
-    handleNameFieldChange(event) {
+    onNameFieldChange(event) {
         this.nameField = event.target.value;
     }
 
-    handleIndustryFieldChange(event) {
+    onIndustryFieldChange(event) {
         this.industryField = event.target.value;
     }
 
-    search() {
+    onSearch() {
         this.pageNumber = 1;
         this.fetchAccounts();
     }
 
-    handlePageSizeChange(event) {
+    onPageSizeChange(event) {
         this.pageSize = parseInt(event.detail.value, 10);
         this.pageNumber = 1;
         this.isLoading = true;
         this.fetchAccounts();
     }
 
-    clearAll() {
+    onClearAll() {
         this.nameField = '';
         this.industryField = '';
         this.pageNumber = 1;
         this.fetchAccounts();
+    }
+
+    goToFirstPage() {
+        if (this.pageNumber > 1) {
+            this.pageNumber = 1;
+            this.fetchAccounts();
+        }
+    }
+
+    goToPreviousPage() {
+        if (this.pageNumber > 1) {
+            this.pageNumber--;
+            this.fetchAccounts();
+        }
+    }
+
+    goToNextPage() {
+        if (this.pageNumber < this.totalPages) {
+            this.pageNumber++;
+            this.fetchAccounts();
+        }
+    }
+
+    goToLastPage() {
+        if (this.pageNumber < this.totalPages) {
+            this.pageNumber = this.totalPages;
+            this.fetchAccounts();
+        }
     }
 
     fetchAccounts() {
@@ -146,66 +187,29 @@ export default class AccountSearch extends NavigationMixin(LightningElement) {
         });
     }
 
-    goToFirstPage() {
-        if (this.pageNumber > 1) {
-            this.pageNumber = 1;
-            this.fetchAccounts();
-        }
-    }
-
-    goToPreviousPage() {
-        if (this.pageNumber > 1) {
-            this.pageNumber--;
-            this.fetchAccounts();
-        }
-    }
-
-    goToNextPage() {
-        if (this.pageNumber < this.totalPages) {
-            this.pageNumber++;
-            this.fetchAccounts();
-        }
-    }
-
-    goToLastPage() {
-        if (this.pageNumber < this.totalPages) {
-            this.pageNumber = this.totalPages;
-            this.fetchAccounts();
-        }
-    }
-
     onRowAction(event) {
-        console.log('rowaction event: ', event);
-        console.log('detail: ', event.detail);
-        console.log('detail.action: ', event.detail.action);
-        console.log('detail.row: ', event.detail.row);
-        console.log('detail.row.Id: ', event.detail.row.Id);
         const actionName = event.detail.action.name;
-        console.log('actionName: ', actionName);
-        const row = event.detail.row;
-        this.recordId = row.Id;
-        this.record = row;
+        const record = event.detail.row;
+        console.log('record from onrowaction: ', JSON.stringify(record));
 
-        if (actionName === 'view_record' && row.Location === 'Local') {
-            console.log('navigation...');
-            this.navigateToRecord(this.recordId);
+        if (actionName === 'view_record' && record.Location === 'Internal') {
+            this.navigateToRecord(record.Id);
         }
 
         if (actionName === 'edit') {
-            this.modifyAccount(this.recordId);
+            this.modifyAccount(record);
         }
     }
 
-    navigateToRecord(event) {
-        this.recordId = event.detail.row.Id;
-        console.log(this.recordId);
-        this[NavigationMixin.Navigate]({
-            type: 'standard__recordPage',
+    navigateToRecord(recordId) {
+        const config = {
+            type: "standard__recordPage",
             attributes: {
-                recordId: this.recordId,
-                objectApiName: 'Account',
-                actionName: 'view'
+                recordId: recordId,
+                objectApiName: "Account",
+                actionName: "view"
             }
-        });
+        }
+        this[NavigationMixin.Navigate](config);
     }
 }

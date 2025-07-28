@@ -3,25 +3,24 @@
     <div class="slds-p-around_medium">
       <div class="create-new">
         <lightning-button label="Create" onclick={onCreateAccount}></lightning-button>
-
         <template lwc:if={showAccountCreation}>
-          <c-create-account-modal mode={accountCreationMode} record={record} onclose={onCloseAccountModal}></c-create-account-modal>
+          <c-create-account-modal mode={accountCreationMode} account={record} onclose={onCloseAccountModal} onrefresh={onRefresh}></c-create-account-modal>
         </template>
       </div>
       <div class="slds-grid slds-grid_align-spread">
         <div class="slds-grid slds-p-around_xx-small inputs">
-          <lightning-input class="compact-input no-border slds-size_1-of-4" label="Search by Name" value={nameField} onchange={handleNameFieldChange}></lightning-input>
-          <lightning-input class="compact-input no-border slds-size_1-of-4" label="Search by Industry" value={industryField} onchange={handleIndustryFieldChange}></lightning-input>
+          <lightning-input class="compact-input no-border slds-size_1-of-4" label="Search by Name" value={nameField} onchange={onNameFieldChange}></lightning-input>
+          <lightning-input class="compact-input no-border slds-size_1-of-4" label="Search by Industry" value={industryField} onchange={onIndustryFieldChange}></lightning-input>
 
-          <lightning-button label="Search" onclick={search}></lightning-button>
-          <lightning-button label="Clear All" onclick={clearAll}></lightning-button>
+          <lightning-button label="Search" onclick={onSearch}></lightning-button>
+          <lightning-button label="Clear All" onclick={onClearAll}></lightning-button>
         </div>
         <div class="slds-col slds-size_1-of-8">
           <lightning-select
               label="Rows per page"
               value={pageSize}
               options={pageSizeOptions}
-              onchange={handlePageSizeChange}>
+              onchange={onPageSizeChange}>
           </lightning-select>
         </div>
       </div>

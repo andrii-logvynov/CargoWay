@@ -1,0 +1,58 @@
+<apex:page id="InvoiceTemplate" standardController="Order" extensions="InvoiceHelper" renderAs="pdf" applyHtmlTag="false" showHeader="false">
+  <head>
+    <style type="text/css">
+      body { font-family: 'Arial Unicode MS'; }
+      .companyName { font-size: 20px; font-weight: bold; }
+      .header { font-weight: bold; }
+    </style>
+  </head>
+
+  <body>
+  <div class="companyName">CargoWay Inc.</div>
+  <h1>Invoice #: {!Order.OrderNumber}</h1>
+  <p>Issue Date: <apex:outputText value="{0,date,MM/dd/yyyy}"><apex:param value="{!TODAY()}" /></apex:outputText></p>
+  <hr/>
+
+  <div class="header">Bill To:</div>
+  <p>
+    {!Order.Account.Name}<br/>
+    {!Order.BillingStreet}<br/>
+    {!Order.BillingCity}, {!Order.BillingState} {!Order.BillingPostalCode}
+  </p>
+  <br/>
+
+  <apex:pageBlock title="Invoice Items">
+    <apex:pageBlockTable value="{!Order.OrderItems}" var="item">
+      <apex:column headerValue="Product">
+        {!item.PricebookEntry.Product2.Name}
+      </apex:column>
+      <apex:column headerValue="Quantity">
+        {!item.Quantity}
+      </apex:column>
+      <apex:column headerValue="Unit Price">
+        <apex:outputText value="{0,number,$###,##0.00}"><apex:param value="{!item.UnitPrice}" /></apex:outputText>
+      </apex:column>
+      <apex:column headerValue="Total Price">
+        <apex:outputText value="{0,number,$###,##0.00}"><apex:param value="{!item.TotalPrice}" /></apex:outputText>
+      </apex:column>
+    </apex:pageBlockTable>
+  </apex:pageBlock>
+  <br/>
+
+  <div style="text-align: right; font-weight: bold; font-size: 16px;">
+    Total Amount: <apex:outputText value="{0,number,$###,##0.00}"><apex:param value="{!Order.TotalAmount}" /></apex:outputText>
+  </div>
+
+  <div style="margin-top: 50px;">
+    <apex:image
+        value="{!signatureImageUrl}"
+        rendered="{!signatureImageUrl != null}"
+        width="200"
+        height="100"
+    />
+    <p>_________________________</p>
+    <p>Signature</p>
+  </div>
+
+  </body>
+</apex:page>

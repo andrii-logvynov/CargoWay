@@ -12,113 +12,238 @@
       <div class="slds-modal__content slds-p-around_medium">
 
         <template lwc:if={isEditMode}>
-          <lightning-record-edit-form
-              object-api-name="Account"
-              record-id={recordId}
-              onsuccess={handleSuccess}
-              onerror={handleError}
-          >
-            <lightning-messages></lightning-messages>
-            <div class="slds-grid slds-wrap">
-              <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                <lightning-input-field field-name="Name" required></lightning-input-field>
-                <lightning-input-field field-name="Industry"></lightning-input-field>
-              </div>
-              <div class="slds-col slds-size_1-of-2 slds-p-horizontal_small">
-                <lightning-input-field field-name="Phone"></lightning-input-field>
-                <lightning-input-field field-name="Type"></lightning-input-field>
-              </div>
-            </div>
-
-            <div class="slds-m-top_medium slds-text-align_right">
-              <lightning-button
-                  label="Cancel"
-                  title="Cancel"
-                  onclick={handleCancel}
-                  class="slds-m-right_x-small">
-              </lightning-button>
-              <lightning-button
-                  variant="brand"
-                  type="submit"
-                  label="Save Account"
-                  title="Save Account">
-              </lightning-button>
-            </div>
-          </lightning-record-edit-form>
-
-        </template>
-
-        <template lwc:if={isCreationMode}>
-
-          <template lwc:if={accountCreated}>
-            <div class="slds-modal slds-fade-in-open">
-              <div class="slds-modal__container">
-                <div class="slds-modal__content slds-p-around_medium">
-                  <p>Account successfully created!</p>
-                  <lightning-button label="Ok" onclick={onClose}></lightning-button>
+          <template lwc:if={isInternal}>
+            <lightning-record-edit-form
+                object-api-name="Account"
+                onerror={onError}
+                onsuccess={onSuccess}
+                record-id={accountIdOrNull}
+            >
+              <lightning-messages></lightning-messages>
+              <div class="slds-grid slds-wrap slds-p-around_medium">
+                <div class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                  <lightning-input-field field-name="Name" required></lightning-input-field>
+                  <lightning-input-field field-label="Parent Account" field-name="ParentId"></lightning-input-field>
+                  <lightning-input-field field-name="AccountNumber"></lightning-input-field>
+                  <lightning-input-field field-label="Account Site" field-name="Site"></lightning-input-field>
+                  <lightning-input-field field-name="Type"></lightning-input-field>
+                  <lightning-input-field field-name="Industry"></lightning-input-field>
+                  <lightning-input-field field-name="AnnualRevenue"></lightning-input-field>
                 </div>
+                <div class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                  <lightning-input-field field-name="Rating"></lightning-input-field>
+                  <lightning-input-field field-name="Phone"></lightning-input-field>
+                  <lightning-input-field field-name="Fax"></lightning-input-field>
+                  <lightning-input-field field-name="Website"></lightning-input-field>
+                  <lightning-input-field field-name="TickerSymbol"></lightning-input-field>
+                  <lightning-input-field field-name="Ownership"></lightning-input-field>
+                  <lightning-input-field field-label="Employees" field-name="NumberOfEmployees"></lightning-input-field>
+                  <lightning-input-field field-label="SIC Code" field-name="Sic"></lightning-input-field>
+                </div>
+              </div>
+
+              <h3 class="slds-section__title slds-theme_shade slds-p-around_small">
+                Address Information
+              </h3>
+              <div class="slds-grid slds-wrap slds-p-around_medium">
+                <div class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                  <lightning-input-field class="slds-m-bottom_small"
+                                         field-name="BillingAddress"></lightning-input-field>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                  <lightning-input-field class="slds-m-bottom_small"
+                                         field-name="ShippingAddress"></lightning-input-field>
+                </div>
+              </div>
+
+              <h3 class="slds-section__title slds-theme_shade slds-p-around_small">
+                Additional Information
+              </h3>
+              <div class="slds-grid slds-wrap slds-p-around_medium">
+                <div class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                  <lightning-input-field field-name="CustomerPriority__c"></lightning-input-field>
+                  <lightning-input-field field-name="SLAExpirationDate__c"></lightning-input-field>
+                  <lightning-input-field field-name="NumberofLocations__c"></lightning-input-field>
+                  <lightning-input-field field-name="Active__c"></lightning-input-field>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                  <lightning-input-field field-name="SLA__c"></lightning-input-field>
+                  <lightning-input-field field-name="SLASerialNumber__c"></lightning-input-field>
+                  <lightning-input-field field-name="UpsellOpportunity__c"></lightning-input-field>
+                </div>
+              </div>
+
+              <h3 class="slds-section__title slds-theme_shade slds-p-around_small">
+                Description Information
+              </h3>
+              <div class="slds-grid slds-wrap slds-p-around_medium">
+                <div class="slds-col slds-size_1-of-1 slds-p-horizontal_small">
+                  <lightning-input-field field-name="Description"></lightning-input-field>
+                </div>
+              </div>
+
+              <div class="slds-m-top_medium slds-text-align_right slds-p-right_medium slds-p-bottom_medium">
+                <lightning-button
+                    class="slds-m-right_x-small"
+                    label="Cancel"
+                    onclick={onClose}
+                    title="Cancel">
+                </lightning-button>
+                <lightning-button
+                    label="Save"
+                    title="Save Account"
+                    type="submit"
+                    variant="brand">
+                </lightning-button>
+              </div>
+            </lightning-record-edit-form>
+          </template>
+          <template lwc:if={isExternal}>
+            <div class="slds-p-around_medium">
+              <template if:true={isLoading}>
+                <lightning-spinner alternative-text="Creating Account..." size="medium"></lightning-spinner>
+              </template>
+
+              <h3 class="slds-section__title slds-theme_shade slds-p-around_small">Account Information</h3>
+              <div class="slds-grid slds-wrap slds-p-around_medium">
+                <div class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                  <lightning-input data-field="Name" label="Account Name" onchange={onFieldChange} required
+                                   value={account.Name}></lightning-input>
+                  <lightning-input data-field="AccountNumber" label="Account Number"
+                                   onchange={onFieldChange} value={account.AccountNumber}></lightning-input>
+                  <lightning-combobox data-field="Type" label="Type" onchange={onFieldChange}
+                                      options={picklists.types} value={account.Type}></lightning-combobox>
+                  <lightning-combobox data-field="Industry" label="Industry" onchange={onFieldChange}
+                                      options={picklists.industries} value={account.Industry}></lightning-combobox>
+                  <lightning-input data-field="AnnualRevenue" formatter="currency" label="Annual Revenue"
+                                   onchange={onFieldChange}
+                                   type="number" value={account.AnnualRevenue}></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                  <lightning-combobox data-field="Rating" label="Rating" onchange={onFieldChange}
+                                      options={picklists.ratingOptions} value={account.Rating}></lightning-combobox>
+                  <lightning-input data-field="Phone" label="Phone" onchange={onFieldChange}
+                                   type="tel"></lightning-input>
+                  <lightning-input data-field="Fax" label="Fax" onchange={onFieldChange} type="tel"
+                                   value={account.Fax}></lightning-input>
+                  <lightning-input data-field="Website" label="Website" onchange={onFieldChange}
+                                   type="url" value={account.Website}></lightning-input>
+                  <lightning-combobox data-field="Ownership" label="Ownership" onchange={onFieldChange}
+                                      options={picklists.ownershipOptions}
+                                      value={account.Ownership}></lightning-combobox>
+                  <lightning-input data-field="NumberOfEmployees" label="Employees" onchange={onFieldChange}
+                                   type="number" value={account.NumberOfEmployees}></lightning-input>
+                </div>
+              </div>
+
+              <h3 class="slds-section__title slds-theme_shade slds-p-around_small">Description Information</h3>
+              <div class="slds-grid slds-wrap slds-p-around_medium">
+                <div class="slds-col slds-size_1-of-1 slds-p-horizontal_small">
+                  <lightning-textarea data-field="Description" label="Description"
+                                      onchange={onFieldChange} value={account.Description}></lightning-textarea>
+                </div>
+              </div>
+
+              <div class="slds-m-top_medium slds-text-align_right">
+                <lightning-button
+                    class="slds-m-right_x-small"
+                    label="Cancel"
+                    onclick={onClose}
+                    title="Cancel">
+                </lightning-button>
+                <lightning-button
+                    label="Save Account"
+                    onclick={onSave}
+                    title="Save Account to External Org"
+                    variant="brand">
+                </lightning-button>
               </div>
             </div>
           </template>
-
-          <lightning-select
+        </template>
+        <template lwc:if={isCreationMode}>
+          <lightning-combobox
               class="slds-form-element slds-size_1-of-3"
               label="Location"
               onchange={onLocationChange}
-              options={locations}
-              value={location}>
-          </lightning-select>
+              options={picklists.locations}
+              value={accountLocation}>
+          </lightning-combobox>
 
           <template lwc:if={isInternal}>
             <lightning-record-form
                 layout-type="Full"
                 mode="edit"
                 object-api-name="Account"
-                onsuccess={createAccount}>
+                onsuccess={onSuccess}>
             </lightning-record-form>
           </template>
-
           <template lwc:if={isExternal}>
-            <lightning-input
-                label="Account Name"
-                onchange={onNameChange}
-                required="true"
-                value={accountName}>
-            </lightning-input>
-            <lightning-select
-                label="Industry"
-                onchange={onIndustryChange}
-                options={industries}
-                required="true"
-                value={industry}>
-            </lightning-select>
-            <lightning-select
-                label="Type"
-                onchange={onTypeChange}
-                options={types}
-                required="true"
-                value={type}>
-            </lightning-select>
+            <lightning-card icon-name="standard:account" title="Create External Account">
+              <div class="slds-p-around_medium">
+                <template if:true={isLoading}>
+                  <lightning-spinner alternative-text="Creating Account..." size="medium"></lightning-spinner>
+                </template>
+
+                <h3 class="slds-section__title slds-theme_shade slds-p-around_small">Account Information</h3>
+                <div class="slds-grid slds-wrap slds-p-around_medium">
+                  <div
+                      class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                    <lightning-input data-field="Name" label="Account Name" onchange={onFieldChange}
+                                     required></lightning-input>
+                    <lightning-input data-field="AccountNumber" label="Account Number"
+                                     onchange={onFieldChange}></lightning-input>
+                    <lightning-combobox data-field="Type" label="Type" onchange={onFieldChange}
+                                        options={picklists.types}></lightning-combobox>
+                    <lightning-combobox data-field="Industry" label="Industry" onchange={onFieldChange}
+                                        options={picklists.industries}></lightning-combobox>
+                    <lightning-input data-field="AnnualRevenue" formatter="currency" label="Annual Revenue"
+                                     onchange={onFieldChange}
+                                     type="number"></lightning-input>
+                  </div>
+                  <div
+                      class="slds-col slds-size_1-of-1 slds-md-size_1-of-2 slds-p-horizontal_small slds-m-bottom_small">
+                    <lightning-combobox data-field="Rating" label="Rating" onchange={onFieldChange}
+                                        options={picklists.ratingOptions}></lightning-combobox>
+                    <lightning-input data-field="Phone" label="Phone" onchange={onFieldChange}
+                                     type="tel"></lightning-input>
+                    <lightning-input data-field="Fax" label="Fax" onchange={onFieldChange} type="tel"></lightning-input>
+                    <lightning-input data-field="Website" label="Website" onchange={onFieldChange}
+                                     type="url"></lightning-input>
+                    <lightning-combobox data-field="Ownership" label="Ownership" onchange={onFieldChange}
+                                        options={picklists.ownershipOptions}></lightning-combobox>
+                    <lightning-input data-field="NumberOfEmployees" label="Employees" onchange={onFieldChange}
+                                     type="number"></lightning-input>
+                  </div>
+                </div>
+
+                <h3 class="slds-section__title slds-theme_shade slds-p-around_small">Description Information</h3>
+                <div class="slds-grid slds-wrap slds-p-around_medium">
+                  <div class="slds-col slds-size_1-of-1 slds-p-horizontal_small">
+                    <lightning-textarea data-field="Description" label="Description"
+                                        onchange={onFieldChange}></lightning-textarea>
+                  </div>
+                </div>
+
+                <div class="slds-m-top_medium slds-text-align_right">
+                  <lightning-button
+                      class="slds-m-right_x-small"
+                      label="Cancel"
+                      onclick={onClose}
+                      title="Cancel">
+                  </lightning-button>
+                  <lightning-button
+                      label="Save Account"
+                      onclick={onSave}
+                      title="Save Account to External Org"
+                      variant="brand">
+                  </lightning-button>
+                </div>
+              </div>
+            </lightning-card>
           </template>
         </template>
       </div>
-
-      <template lwc:if={isExternal}>
-        <footer class="slds-modal__footer slds-button-group-row">
-          <lightning-button
-              class="slds-button-group-item"
-              label="Cancel"
-              onclick={onClose}
-              variant="neutral"
-          ></lightning-button>
-          <lightning-button
-              class="slds-button-group-item"
-              label="Save"
-              onclick={createAccount}
-              variant="brand"
-          ></lightning-button>
-        </footer>
-      </template>
     </div>
   </section>
 

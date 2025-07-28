@@ -1,0 +1,32 @@
+<template>
+  <lightning-card title="Document Signature" icon-name="utility:edit">
+    <div class="slds-m-around_medium">
+      <lightning-button
+          label="Sign Document"
+          variant="brand"
+          onclick={openModal}>
+      </lightning-button>
+    </div>
+  </lightning-card>
+
+  <template if:true={isModalOpen}>
+    <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+      <div class="slds-modal__container">
+        <header class="slds-modal__header">
+          <h2 class="slds-modal__title slds-hyphenate">Please Sign Below</h2>
+        </header>
+
+        <div class="slds-modal__content slds-p-around_medium">
+          <canvas class="signature-canvas" width="500" height="200" style="border: 1px solid #000;"></canvas>
+        </div>
+
+        <footer class="slds-modal__footer">
+          <button class="slds-button slds-button_neutral" onclick={closeModal}>Cancel</button>
+          <button class="slds-button slds-button_neutral" onclick={handleClearClick}>Clear</button>
+          <button class="slds-button slds-button_brand" onclick={handleSaveClick}>Save Signature</button>
+        </footer>
+      </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+  </template>
+</template>

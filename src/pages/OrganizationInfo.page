@@ -8,20 +8,20 @@
             <apex:column value="{!license.availableLicenses}"/>
         </apex:pageBlockTable>
 
-        <apex:pageBlock>
+        <apex:pageBlock >
             Number of Apex Classes: {!numberOfApexClasses}
         </apex:pageBlock>
 
-        <apex:pageBlock>
+        <apex:pageBlock >
             Number of Visualforce Pages: {!numberOfVisualforcePages}
         </apex:pageBlock>
 
-        <apex:form>
+        <apex:form >
             <apex:pageBlockTable value="{!usersTable}" var="user">
                 <apex:column value="{!user.Username}"/>
                 <apex:column value="{!user.Email}"/>
                 <apex:column value="{!user.IsActive}"/>
-                <apex:column>
+                <apex:column >
                     <apex:commandLink value="View" action="{!viewUser}">
                         <apex:param name="id" value="{!user.Id}" assignTo="{!userId}" />
                     </apex:commandLink>
@@ -31,7 +31,7 @@
 
     </apex:pageBlock>
 
-    <apex:pageBlock>
+    <apex:pageBlock >
         Session id: {!sessionId}
     </apex:pageBlock>
 
