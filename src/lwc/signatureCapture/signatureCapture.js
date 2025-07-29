@@ -84,8 +84,9 @@ export default class SignatureCapture extends LightningElement {
         const signatureData = newCanvas.toDataURL('image/png');
 
         saveSignature({ recordId: this.recordId, signatureBody: signatureData })
-            .then(() => {
-                generateInvoice({ recordId: [this.recordId] });
+            .then(signatureId => {
+                console.log(JSON.stringify(signatureId));
+                generateInvoice({ recordId: this.recordId });
             })
             .then(() => {
                 this.showToast('Success', 'Signature saved successfully.', 'success');
