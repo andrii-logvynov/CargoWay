@@ -15,38 +15,26 @@ public with sharing class SignatureController {
         String base64Data = signatureBody.substringAfter('base64,');
 
         try {
-            ContentVersion cv = new ContentVersion();
-            cv.Title = 'Signature';
-            cv.PathOnClient = 'signature.png';
-            cv.VersionData = EncodingUtil.base64Decode(base64Data);
-            insert cv;
-            cv = [SELECT Id, ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id];
-
-            List<ContentDocumentLink> oldInvoices = [
-                    SELECT Id, ContentDocumentId
-                    FROM ContentDocumentLink
-                    WHERE LinkedEntityId = :recordId
-                    AND ContentDocument.Title LIKE 'Faktura dla zamówienia%'
-            ];
-            if (!oldInvoices.isEmpty()) {
-                List<ContentDocument> docsToDelete = new List<ContentDocument>();
-                for (ContentDocumentLink link : oldInvoices) {
-                    docsToDelete.add(new ContentDocument(Id = link.ContentDocumentId));
-                }
-                delete docsToDelete;
-            }
-            System.debug('SignatureController: Signature file saved. About to regenerate PDF.');
-
-            InvoiceGenerator.generateInvoice(new List<Id>{recordId});
-
+            ContentVersion signature = new ContentVersion();
+            signature.Title = 'Signature';
+            signature.PathOnClient = 'signature.png';
+            signature.VersionData = EncodingUtil.base64Decode(base64Data);
+            signature.FirstPublishLocationId = recordId;
+            insert signature;
+            System.debug('SignatureController: Signature file saved. Id: ' + signature.Id);
 
             Order orderToUpdate = new Order(Id = recordId, Signed__c = true);
             update orderToUpdate;
-            System.debug('Pdf updated: ' + orderToUpdate.Id);
 
         } catch (Exception e) {
             System.debug('Exception: ' + e);
             throw new AuraHandledException(e.getMessage());
         }
+    }
+
+    @AuraEnabled
+    public static void generateInvoice(String recordId) {
+        Id actualRecordId = (Id) recordId;
+        InvoiceGenerator.generateInvoice(new List<Id>{actualRecordId});
     }
 }

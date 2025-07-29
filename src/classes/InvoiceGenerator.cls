@@ -4,8 +4,9 @@ public with sharing class InvoiceGenerator {
             Description='Creates a PDF invoice from an Order record.'
     )
     public static void generateInvoice(List<Id> orderIds) {
+        System.debug('Starting invoice generation');
         Id orderId = orderIds[0];
-
+        System.debug('Order Id: ' + orderId);
         PageReference pdfPage = Page.InvoiceTemplate;
 
         pdfPage.getParameters().put('id', orderId);
@@ -18,14 +19,16 @@ public with sharing class InvoiceGenerator {
             return;
         }
 
-        ContentVersion cv = new ContentVersion();
-        cv.Title = 'Faktura dla zamówienia ' + orderId;
-        cv.PathOnClient = 'Faktura.pdf';
-        cv.VersionData = pdfBlob;
-        cv.IsMajorVersion = true;
-        insert cv;
+        ContentVersion invoice = new ContentVersion();
+        invoice.Title = 'Faktura dla zamówienia ' + orderId;
+        invoice.PathOnClient = 'Faktura.pdf';
+        invoice.VersionData = pdfBlob;
+        invoice.IsMajorVersion = true;
+        insert invoice;
 
-        Id docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id].ContentDocumentId;
+        System.debug('Generated Invoice: ' + invoice.Id);
+
+        Id docId = [SELECT ContentDocumentId FROM ContentVersion WHERE Id = :invoice.Id].ContentDocumentId;
 
         ContentDocumentLink cdl = new ContentDocumentLink();
         cdl.ContentDocumentId = docId;

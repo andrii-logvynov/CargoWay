@@ -4,6 +4,7 @@ import { loadScript } from 'lightning/platformResourceLoader';
 import SignaturePad from '@salesforce/resourceUrl/signature_pad';
 import saveSignature from '@salesforce/apex/SignatureController.saveSignature';
 import getOrderDetails from '@salesforce/apex/SignatureController.getOrderDetails';
+import generateInvoice from '@salesforce/apex/SignatureController.generateInvoice';
 
 
 export default class SignatureCapture extends LightningElement {
@@ -27,7 +28,7 @@ export default class SignatureCapture extends LightningElement {
 
     get showSignButton() {
         if (this.order) {
-            console.log(`${JSON.stringify(this.order) } && ${this.order.Status === 'Active'} && ${!this.order.Signed__c}`)
+            console.log(`${JSON.stringify(this.order)} && ${this.order.Status === 'Active'} && ${!this.order.Signed__c}`)
             return this.order && this.order.Status === 'Active' && !this.order.Signed__c;
         } else {
             return false;
@@ -75,11 +76,17 @@ export default class SignatureCapture extends LightningElement {
         newCanvas.height = signatureCanvas.height;
         const ctx = newCanvas.getContext('2d');
 
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+
         ctx.drawImage(signatureCanvas, 0, 0);
 
         const signatureData = newCanvas.toDataURL('image/png');
 
         saveSignature({ recordId: this.recordId, signatureBody: signatureData })
+            .then(() => {
+                generateInvoice({ recordId: [this.recordId] });
+            })
             .then(() => {
                 this.showToast('Success', 'Signature saved successfully.', 'success');
                 this.closeModal();

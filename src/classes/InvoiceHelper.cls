@@ -8,7 +8,7 @@ public class InvoiceHelper {
 
     public String getSignatureImageUrl() {
         List<ContentDocumentLink> links = [
-                SELECT ContentDocument.LatestPublishedVersion.VersionDataUrl
+                SELECT ContentDocument.LatestPublishedVersion.Id
                 FROM ContentDocumentLink
                 WHERE LinkedEntityId = :order.Id
                 AND ContentDocument.LatestPublishedVersion.Title = 'Signature'
@@ -19,8 +19,9 @@ public class InvoiceHelper {
         System.debug('InvoiceHelper: Found ' + links.size() + ' signature files.');
 
         if (!links.isEmpty()) {
-            System.debug('InvoiceHelper: Signature found! Returning VersionDataUrl:' + links[0].ContentDocument.LatestPublishedVersion.VersionDataUrl);
-            return links[0].ContentDocument.LatestPublishedVersion.VersionDataUrl;
+            String link = Url.getOrgDomainUrl().toExternalForm() + '/sfc/servlet.shepherd/version/renditionDownload?rendition=ORIGINAL_Png&versionId=' + links[0].ContentDocument.LatestPublishedVersion.Id;
+            System.debug('InvoiceHelper: Signature found! Returning VersionDataUrl:' + link);
+            return link;
         }
 
         System.debug('InvoiceHelper: No signature found. Returning null.');
