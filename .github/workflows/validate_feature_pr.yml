@@ -29,4 +29,4 @@ jobs:
 
       - name: 'Validate Deployment to Salesforce Org'
         run: |
-          sf project deploy validate --source-dir force-app
+          sf project deploy validate --source-dir src
