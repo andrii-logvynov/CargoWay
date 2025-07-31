@@ -1,0 +1,32 @@
+name: Deploy to DeveloperOrg after PR Merge
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - develop
+jobs:
+  merge_job:
+    if: github.event.pull_request.merged == true && startsWith(github.head_ref, 'feature/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout source code'
+        uses: actions/checkout@v3
+
+      - name: 'Install Salesforce CLI'
+        run: |
+          npm install @salesforce/cli --global
+
+      - name: 'Authenticate to Salesforce Org'
+        run: |
+          echo "${{ secrets.SF_SECRET_KEY }}" > server.key
+          sf org login jwt \  
+            --client-id ${{ secrets.SF_CONSUMER_KEY_DEVELOPER }} \
+            --jwt-key-file server.key \
+            --username ${{ secrets.SF_USERNAME_DEVELOPER }} \
+            --instance-url ${{ secrets.SF_SERVER_URL }} \
+            --alias SFDC_v1 \
+            --set-default
+
+      - name: 'Deploy to Salesforce Developer Org'
+        run: |
+          sf project deploy start --source-dir force-app
